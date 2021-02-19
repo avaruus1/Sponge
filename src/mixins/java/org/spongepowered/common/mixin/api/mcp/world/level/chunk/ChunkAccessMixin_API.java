@@ -33,7 +33,7 @@ import org.spongepowered.api.world.chunk.ChunkState;
 import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.ChunkUtil;
+import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
 import javax.annotation.Nullable;
 
@@ -63,7 +63,7 @@ public interface ChunkAccessMixin_API<P extends ProtoChunk<P>> extends ProtoChun
 
     @Override
     default boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        return ChunkUtil.setBiome(this.shadow$getBiomes(), x, y, z, biome);
+        return VolumeStreamUtils.setBiome((ChunkAccess) (Object) this, x, y, z, biome);
     }
 
 }
