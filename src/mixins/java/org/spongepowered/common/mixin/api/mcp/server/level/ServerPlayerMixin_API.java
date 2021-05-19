@@ -29,6 +29,8 @@ import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.inventory.Book;
+import net.kyori.adventure.permission.PermissionChecker;
+import net.kyori.adventure.pointer.Pointer;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
@@ -118,6 +120,8 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Shadow public abstract net.minecraft.server.level.ServerLevel shadow$getLevel();
     // @formatter:on
+
+    private PermissionChecker api$permissions;
 
     private final TabList api$tabList = new SpongeTabList((net.minecraft.server.level.ServerPlayer) (Object) this);
     @Nullable private PlayerChatFormatter api$chatRouter;
@@ -410,6 +414,24 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     // Audience
+
+    @Override
+    @SuppressWarnings("unchecked") // safe casts
+    public <T> Optional<T> get(final Pointer<T> pointer) {
+        if (pointer == Identity.NAME) {
+            return Optional.of((T) ((net.minecraft.server.level.ServerPlayer) (Object) this).getGameProfile().getName());
+        } else if (pointer == Identity.DISPLAY_NAME) {
+            return Optional.of((T) this.displayName());
+        } else if (pointer == Identity.UUID) {
+            return Optional.of((T) ((net.minecraft.world.entity.Entity) (Object) this).getUUID());
+        } else if (pointer == PermissionChecker.POINTER) {
+            if (this.api$permissions == null) {
+                this.api$permissions = permission -> SpongeAdventure.asAdventure(this.permissionValue(permission));
+            }
+            return Optional.of((T) this.api$permissions);
+        }
+        return ServerPlayer.super.get(pointer);
+    }
 
     @Override
     public void sendMessage(final Identity identity, final Component message, final MessageType type) {
