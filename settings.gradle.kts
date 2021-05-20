@@ -5,6 +5,7 @@ pluginManagement {
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }
+        maven("https://maven.architectury.dev/")
     }
 
     plugins {
@@ -23,7 +24,7 @@ plugins {
 }
 
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT) // needed for forge-loom, unfortunately
     repositories {
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
