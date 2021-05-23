@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.server.level;
 
 import net.minecraft.server.level.ChunkMap;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.Ticket;
@@ -33,6 +34,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.server.ChunkMapBridge;
+import org.spongepowered.common.bridge.world.server.TicketBridge;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
@@ -41,24 +43,34 @@ import java.util.Optional;
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin_API implements org.spongepowered.api.world.server.ChunkManager {
 
+    // @formatter:off
     @Shadow @Final private net.minecraft.server.level.ServerLevel level;
+    // @formatter:on
 
     @Override
+    @NonNull
     public ServerWorld world() {
         return (ServerWorld) this.level;
     }
 
     @Override
-    public boolean isValid(final Ticket<?> ticket) {
+    public boolean valid(final @NonNull Ticket<?> ticket) {
         return ((ChunkMapBridge) this).bridge$distanceManager().bridge$checkTicketValid(ticket);
     }
 
     @Override
-    public Ticks timeLeft(final Ticket<?> ticket) {
-        return ((ChunkMapBridge) this).bridge$distanceManager().bridge$getTimeLeft(ticket);
+    @NonNull
+    public Ticks timeLeft(final @NonNull Ticket<?> ticket) {
+        return ((ChunkMapBridge) this).bridge$distanceManager().bridge$timeLeft(ticket);
     }
 
     @Override
+    public boolean processed(final @NonNull Ticket<?> ticket) {
+        return ((TicketBridge) ticket).bridge$processed();
+    }
+
+    @Override
+    @NonNull
     public <T> Optional<Ticket<T>> requestTicket(final TicketType<T> type, final Vector3i chunkPosition, final T value, final int radius) {
         if (radius < 1) {
             throw new IllegalArgumentException("The radius must be positive.");
@@ -68,18 +80,19 @@ public abstract class ChunkMapMixin_API implements org.spongepowered.api.world.s
     }
 
     @Override
-    public boolean renewTicket(final Ticket<?> ticket) {
+    public boolean renewTicket(final @NonNull Ticket<?> ticket) {
         return ((ChunkMapBridge) this).bridge$distanceManager().bridge$renewTicket(ticket);
     }
 
     @Override
-    public boolean releaseTicket(final Ticket<?> ticket) {
+    public boolean releaseTicket(final @NonNull Ticket<?> ticket) {
         return ((ChunkMapBridge) this).bridge$distanceManager().bridge$releaseTicket(ticket);
     }
 
     @Override
-    public <T> Collection<Ticket<T>> findTickets(final TicketType<T> type) {
-        return ((ChunkMapBridge) this).bridge$distanceManager().bridge$getTickets(type);
+    @NonNull
+    public <T> Collection<Ticket<T>> findTickets(final @NonNull TicketType<T> type) {
+        return ((ChunkMapBridge) this).bridge$distanceManager().bridge$tickets(type);
     }
 
 }

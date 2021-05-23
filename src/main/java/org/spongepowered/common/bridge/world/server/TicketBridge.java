@@ -24,10 +24,20 @@
  */
 package org.spongepowered.common.bridge.world.server;
 
+import net.minecraft.server.level.Ticket;
+
 public interface TicketBridge {
 
-    long bridge$getChunkPosition();
+    long bridge$chunkPosition();
 
     void bridge$setChunkPosition(long chunkPos);
+
+    boolean bridge$processed();
+
+    void bridge$markProcessed();
+
+    <T> org.spongepowered.api.world.server.Ticket<T> bridge$retrieveAppropriateTicket();
+
+    void bridge$setParentTicket(Ticket<?> parentTicket);
 
 }

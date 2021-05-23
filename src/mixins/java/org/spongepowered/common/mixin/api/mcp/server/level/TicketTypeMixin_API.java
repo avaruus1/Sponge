@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.server.level;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.server.TicketType;
 import org.spongepowered.asm.mixin.Final;
@@ -38,6 +39,7 @@ public abstract class TicketTypeMixin_API<T> implements TicketType<T> {
     // @formatter:on
 
     @Override
+    @NonNull
     public Ticks lifetime() {
         return Ticks.of(this.timeout);
     }

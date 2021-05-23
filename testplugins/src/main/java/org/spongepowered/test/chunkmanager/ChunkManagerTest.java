@@ -29,11 +29,14 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.LinearComponents;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.server.ChunkManager;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.Ticket;
@@ -71,7 +74,7 @@ public final class ChunkManagerTest {
                     final ServerLocation location = context.requireOne(serverLocationParameter);
                     final ChunkManager manager = location.world().chunkManager();
                     final Optional<Ticket<Vector3i>> optionalTicket = manager
-                            .requestTicket(TicketTypes.FORCED.get(), location.chunkPosition(), location.chunkPosition(), 33);
+                            .requestTicket(TicketTypes.FORCED.get(), location.chunkPosition(), location.chunkPosition(), 5);
                     if (optionalTicket.isPresent()) {
                         final Ticket<Vector3i> ticket = optionalTicket.get();
                         context.sendMessage(Identity.nil(), LinearComponents.linear(
@@ -80,7 +83,7 @@ public final class ChunkManagerTest {
 
                         context.sendMessage(Identity.nil(), LinearComponents.linear(
                                 Component.text("Ticket validity check: "),
-                                Component.text(manager.isValid(ticket))
+                                Component.text(manager.valid(ticket))
                         ));
 
                         // now find the ticket
@@ -91,6 +94,14 @@ public final class ChunkManagerTest {
                             context.sendMessage(Identity.nil(),
                                     Component.text().content("Ticket was not found in the chunk manager").color(NamedTextColor.RED).build());
                         }
+
+                        context.sendMessage(Identity.nil(),
+                                Component.text().content("Ticket processed: " + manager.processed(ticket)).color(NamedTextColor.RED).build());
+                        final Task task = Task.builder().delay(Ticks.of(5)).execute(() -> {
+                            context.sendMessage(Identity.nil(),
+                                    Component.text().content("Ticket processed: " + manager.processed(ticket)).color(NamedTextColor.RED).build());
+                        }).plugin(this.pluginContainer).build();
+                        Sponge.server().scheduler().submit(task);
                     } else {
                         context.sendMessage(Identity.nil(), Component.text("Ticket was not registered."));
                     }

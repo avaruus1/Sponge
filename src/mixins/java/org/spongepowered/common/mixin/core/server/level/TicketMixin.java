@@ -32,15 +32,41 @@ import org.spongepowered.common.bridge.world.server.TicketBridge;
 public abstract class TicketMixin implements TicketBridge {
 
     private long impl$chunkPosition;
+    private boolean impl$processed = false;
+    private Ticket<?> impl$parent;
 
     @Override
-    public long bridge$getChunkPosition() {
+    public long bridge$chunkPosition() {
         return this.impl$chunkPosition;
     }
 
     @Override
     public void bridge$setChunkPosition(final long chunkPos) {
         this.impl$chunkPosition = chunkPos;
+    }
+
+    @Override
+    public boolean bridge$processed() {
+        return this.impl$processed;
+    }
+
+    @Override
+    public void bridge$markProcessed() {
+        this.impl$processed = true;
+    }
+
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
+    @Override
+    public <T> org.spongepowered.api.world.server.Ticket<T> bridge$retrieveAppropriateTicket() {
+        if (this.impl$parent != null) {
+            return (org.spongepowered.api.world.server.Ticket<T>) (Object) this.impl$parent;
+        }
+        return (org.spongepowered.api.world.server.Ticket<T>) this;
+    }
+
+    @Override
+    public void bridge$setParentTicket(final Ticket<?> parentTicket) {
+        this.impl$parent = parentTicket;
     }
 
 }

@@ -37,7 +37,7 @@ public interface DistanceManagerBridge {
 
     boolean bridge$checkTicketValid(Ticket<?> ticket);
 
-    Ticks bridge$getTimeLeft(Ticket<?> ticket);
+    Ticks bridge$timeLeft(Ticket<?> ticket);
 
     <S, T> Optional<Ticket<T>> bridge$registerTicket(ServerWorld world, TicketType<T> ticketType, Vector3i pos, T value, int distanceLimit);
 
@@ -45,6 +45,6 @@ public interface DistanceManagerBridge {
 
     boolean bridge$releaseTicket(Ticket<?> ticket);
 
-    <T> Collection<Ticket<T>> bridge$getTickets(TicketType<T> ticketType);
+    <T> Collection<Ticket<T>> bridge$tickets(TicketType<T> ticketType);
 
 }

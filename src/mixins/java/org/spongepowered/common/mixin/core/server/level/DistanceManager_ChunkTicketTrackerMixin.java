@@ -22,29 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.mixin.core.server.level;
 
 import net.minecraft.server.level.Ticket;
-import net.minecraft.server.level.TicketType;
+import net.minecraft.util.SortedArraySet;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.world.server.TicketBridge;
 
-@Mixin(Ticket.class)
-public interface TicketAccessor<T> {
+@Mixin(targets = "net/minecraft/server/level/DistanceManager$ChunkTicketTracker")
+public abstract class DistanceManager_ChunkTicketTrackerMixin {
 
-    @Invoker("<init>")
-    static <T> Ticket<T> accessor$createInstance(final TicketType<T> ticketType, final int ticketLevel, final T key) {
-        throw new UntransformedInvokerError();
+    @SuppressWarnings("ConstantConditions")
+    @Redirect(method = "getLevelFromSource",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/SortedArraySet;isEmpty()Z"))
+    private boolean impl$markTicketsProcessed(final SortedArraySet<Ticket<?>> sortedArraySet) {
+        if (sortedArraySet.isEmpty()) {
+            return true;
+        }
+        for (final Ticket<?> ticket : sortedArraySet) {
+            System.out.println("Marked ticket as processed - " + ticket.toString());
+            ((TicketBridge) (Object) ticket).bridge$markProcessed();
+        }
+        return false;
     }
-
-    @Accessor("createdTick") long accessor$createdTick();
-
-    @Accessor("key") T accessor$key();
-
-    @Invoker("timedOut") boolean invoker$timedOut(long currentTimestamp);
-
-    @Invoker("setCreatedTick") void invoker$setCreatedTick(long timestamp);
 
 }
