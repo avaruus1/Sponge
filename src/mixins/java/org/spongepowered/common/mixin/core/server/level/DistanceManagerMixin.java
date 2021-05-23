@@ -25,10 +25,12 @@
 package org.spongepowered.common.mixin.core.server.level;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.DistanceManager;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.util.SortedArraySet;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.Ticket;
@@ -63,27 +65,29 @@ public abstract class DistanceManagerMixin implements DistanceManagerBridge {
     // @formatter:on
 
     @Override
-    @SuppressWarnings({"unchecked", "SuspiciousMethodCalls", "ConstantConditions"})
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
     public boolean bridge$checkTicketValid(final Ticket<?> ticket) {
         // Only report the ticket is valid if it's associated with this manager.
         final net.minecraft.server.level.Ticket<?> nativeTicket = ((net.minecraft.server.level.Ticket<?>) (Object) ticket);
-        if (this.tickets.containsValue(nativeTicket)) {
+        final SortedArraySet<net.minecraft.server.level.Ticket<?>> ticketsForChunk = this.tickets.get(((TicketBridge) ticket).bridge$chunkPosition());
+        if (ticketsForChunk != null && ticketsForChunk.contains(nativeTicket)) {
             return ((TicketAccessor<ChunkPos>) ticket).invoker$timedOut(this.ticketTickCounter);
         }
         return false;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("ConstantConditions")
     public Ticks bridge$timeLeft(final Ticket<?> ticket) {
         if (this.bridge$checkTicketValid(ticket)) {
-            return new SpongeTicks(((TicketAccessor<ChunkPos>) ticket).accessor$createdTick() - this.ticketTickCounter);
+            final long ticksElapsed = this.ticketTickCounter - ((TicketAccessor<?>) ticket).accessor$createdTick();
+            return new SpongeTicks(Math.max(0, ((net.minecraft.server.level.Ticket<?>) (Object) ticket).getType().timeout() - ticksElapsed));
         }
         return Ticks.zero();
     }
 
     @Override
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
     public boolean bridge$renewTicket(final Ticket<?> ticket) {
         if (this.bridge$checkTicketValid(ticket)) {
             final net.minecraft.server.level.Ticket<?> nativeTicket = (net.minecraft.server.level.Ticket<?>) (Object) ticket;
@@ -96,12 +100,13 @@ public abstract class DistanceManagerMixin implements DistanceManagerBridge {
     @Override
     @SuppressWarnings("unchecked")
     public <S, T> Optional<Ticket<T>> bridge$registerTicket(
-            final ServerWorld world, final org.spongepowered.api.world.server.TicketType<T> ticketType, final Vector3i pos, final T value, final int distanceLimit) {
+            final ServerWorld world, final org.spongepowered.api.world.server.TicketType<T> ticketType,
+            final Vector3i pos, final T value, final int distanceLimit) {
         final TicketType<S> type = (net.minecraft.server.level.TicketType<S>) ticketType;
-        final net.minecraft.server.level.Ticket<?> ticketToRequest =
+        final net.minecraft.server.level.Ticket<S> ticketToRequest =
                 TicketAccessor.accessor$createInstance(
                         type,
-                        Constants.ChunkTicket.MAXIMUM_CHUNK_TICKET_LEVEL - distanceLimit,
+                        ChunkMap.MAX_CHUNK_DISTANCE - distanceLimit,
                         ((TicketTypeBridge<S, T>) ticketType).bridge$convertToNativeType(value));
         this.shadow$addTicket(VecHelper.toChunkPos(pos).toLong(), ticketToRequest);
         return Optional.of(((TicketBridge) (Object) ticketToRequest).bridge$retrieveAppropriateTicket());
@@ -139,13 +144,14 @@ public abstract class DistanceManagerMixin implements DistanceManagerBridge {
     private void impl$setParentTicketIfApplicable(final net.minecraft.server.level.Ticket<?> storedTicket,
                                                   final long ticketTickCounter,
                                                   final long chunkPosAsLong,
-                                                  net.minecraft.server.level.Ticket<?> originalTicket) {
+                                                  final net.minecraft.server.level.Ticket<?> originalTicket) {
         // We do this because we want to return the original ticket that will actually be operated on, but avoid a
         // potentially costly search on an array - because addTicket doesn't return the ticket that is actually
         // in the manager.
         if (storedTicket != originalTicket) {
             ((TicketBridge) (Object) originalTicket).bridge$setParentTicket(storedTicket);
         }
+        ((TicketAccessor) (Object) storedTicket).invoker$setCreatedTick(ticketTickCounter);
     }
 
 }

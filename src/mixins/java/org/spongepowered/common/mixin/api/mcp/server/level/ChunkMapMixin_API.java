@@ -72,6 +72,9 @@ public abstract class ChunkMapMixin_API implements org.spongepowered.api.world.s
     @Override
     @NonNull
     public <T> Optional<Ticket<T>> requestTicket(final TicketType<T> type, final Vector3i chunkPosition, final T value, final int radius) {
+        if (!(type instanceof net.minecraft.server.level.TicketType)) {
+            throw new IllegalArgumentException("TicketType must be a Minecraft TicketType");
+        }
         if (radius < 1) {
             throw new IllegalArgumentException("The radius must be positive.");
         }

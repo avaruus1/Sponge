@@ -74,7 +74,7 @@ public final class ChunkManagerTest {
                     final ServerLocation location = context.requireOne(serverLocationParameter);
                     final ChunkManager manager = location.world().chunkManager();
                     final Optional<Ticket<Vector3i>> optionalTicket = manager
-                            .requestTicket(TicketTypes.FORCED.get(), location.chunkPosition(), location.chunkPosition(), 5);
+                            .requestTicket(TicketTypes.STANDARD, location.chunkPosition(), location.chunkPosition(), 5);
                     if (optionalTicket.isPresent()) {
                         final Ticket<Vector3i> ticket = optionalTicket.get();
                         context.sendMessage(Identity.nil(), LinearComponents.linear(
@@ -87,7 +87,7 @@ public final class ChunkManagerTest {
                         ));
 
                         // now find the ticket
-                        if (manager.findTickets(TicketTypes.FORCED.get()).contains(ticket)) {
+                        if (manager.findTickets(TicketTypes.STANDARD).contains(ticket)) {
                             context.sendMessage(Identity.nil(),
                                     Component.text().content("Ticket was found in the chunk manager").color(NamedTextColor.GREEN).build());
                         } else {

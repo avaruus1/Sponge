@@ -22,29 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.level;
+package org.spongepowered.common.world.server;
 
-import net.minecraft.server.level.Ticket;
-import net.minecraft.util.SortedArraySet;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.server.TicketBridge;
+import net.minecraft.server.level.TicketType;
+import org.spongepowered.api.util.Ticks;
+import org.spongepowered.common.bridge.world.server.TicketTypeBridge;
+import org.spongepowered.common.util.SpongeTicks;
 
-@Mixin(targets = "net/minecraft/server/level/DistanceManager$ChunkTicketTracker")
-public abstract class DistanceManager_ChunkTicketTrackerMixin {
+import java.util.Comparator;
+import java.util.function.Function;
 
-    @SuppressWarnings("ConstantConditions")
-    @Redirect(method = "getLevelFromSource",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/SortedArraySet;isEmpty()Z"))
-    private boolean impl$markTicketsProcessed(final SortedArraySet<Ticket<?>> sortedArraySet) {
-        if (sortedArraySet.isEmpty()) {
-            return true;
-        }
-        for (final Ticket<?> ticket : sortedArraySet) {
-            ((TicketBridge) (Object) ticket).bridge$markProcessed();
-        }
-        return false;
+// For use with our own ticket types.
+public final class SpongeTicketType<T> extends TicketType<T> implements org.spongepowered.api.world.server.TicketType<T> {
+
+    @SuppressWarnings({"ConstantConditions", "unchecked"})
+    public SpongeTicketType(final String param0, final Comparator<T> param1, final long param2) {
+        super(param0, param1, param2);
+        // base class was mixed in to, so we know we can do this.
+        ((TicketTypeBridge<T, T>) (Object) this).bridge$setTypeConverter(Function.identity());
+    }
+
+    @Override
+    public Ticks lifetime() {
+        return new SpongeTicks(this.timeout());
     }
 
 }
