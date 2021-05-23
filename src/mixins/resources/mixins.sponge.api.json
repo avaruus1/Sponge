@@ -315,6 +315,7 @@
         "mcp.world.level.block.entity.JukeboxBlockEntityMixin_API",
         "mcp.world.level.block.entity.LecternBlockEntityMixin_API",
         "mcp.world.level.block.entity.RandomizableContainerBlockEntityMixin_API",
+        "mcp.world.level.block.entity.SculkSensorBlockEntityMixin_API",
         "mcp.world.level.block.entity.ShulkerBoxBlockEntityMixin_API",
         "mcp.world.level.block.entity.SignBlockEntityMixin_API",
         "mcp.world.level.block.entity.SkullBlockEntityMixin_API",
