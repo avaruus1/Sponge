@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -46,7 +47,7 @@ public final class SignItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.SIGN_LINES)
                         .get(h -> {
-                            final CompoundTag tag = h.getTagElement(Constants.Item.BLOCK_ENTITY_TAG);
+                            final @Nullable CompoundTag tag = h.getTagElement(Constants.Item.BLOCK_ENTITY_TAG);
                             if (tag == null) {
                                 return null;
                             }
