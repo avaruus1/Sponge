@@ -37,11 +37,7 @@ public final class SeaPickleData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asImmutable(BlockState.class)
-                    .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(SeaPickleBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(SeaPickleBlock.WATERLOGGED, v))
-                        .supports(h -> h.getBlock() instanceof SeaPickleBlock);
+                .asImmutable(BlockState.class); // todo: pickles
     }
     // @formatter:on
 }

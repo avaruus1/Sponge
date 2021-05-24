@@ -24,24 +24,26 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.world.level.block.CrossCollisionBlock;
+import net.minecraft.world.level.block.SeaPickleBlock;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-public final class FourWayData {
+public final class SimpleWaterloggedBlockData {
 
-    private FourWayData() {
+    private SimpleWaterloggedBlockData() {
     }
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asImmutable(BlockState.class)
-                    .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(CrossCollisionBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(CrossCollisionBlock.WATERLOGGED, v))
-                        .supports(h -> h.getBlock() instanceof CrossCollisionBlock);
+            .asImmutable(BlockState.class)
+            .create(Keys.IS_WATERLOGGED)
+            .get(h -> h.getValue(SeaPickleBlock.WATERLOGGED))
+            .set((h, v) -> h.setValue(SeaPickleBlock.WATERLOGGED, v))
+            .supports(h -> h.getBlock() instanceof SimpleWaterloggedBlock);
     }
     // @formatter:on
+
 }
