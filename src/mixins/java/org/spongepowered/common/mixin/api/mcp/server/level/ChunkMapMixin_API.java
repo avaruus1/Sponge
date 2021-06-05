@@ -65,11 +65,6 @@ public abstract class ChunkMapMixin_API implements org.spongepowered.api.world.s
     }
 
     @Override
-    public boolean processed(final @NonNull Ticket<?> ticket) {
-        return ((TicketBridge) ticket).bridge$processed();
-    }
-
-    @Override
     @NonNull
     public <T> Optional<Ticket<T>> requestTicket(final TicketType<T> type, final Vector3i chunkPosition, final T value, final int radius) {
         if (!(type instanceof net.minecraft.server.level.TicketType)) {

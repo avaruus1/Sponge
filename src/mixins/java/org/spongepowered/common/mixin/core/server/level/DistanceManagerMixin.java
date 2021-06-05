@@ -71,7 +71,7 @@ public abstract class DistanceManagerMixin implements DistanceManagerBridge {
         final net.minecraft.server.level.Ticket<?> nativeTicket = ((net.minecraft.server.level.Ticket<?>) (Object) ticket);
         final SortedArraySet<net.minecraft.server.level.Ticket<?>> ticketsForChunk = this.tickets.get(((TicketBridge) ticket).bridge$chunkPosition());
         if (ticketsForChunk != null && ticketsForChunk.contains(nativeTicket)) {
-            return ((TicketAccessor<ChunkPos>) ticket).invoker$timedOut(this.ticketTickCounter);
+            return !((TicketAccessor<ChunkPos>) ticket).invoker$timedOut(this.ticketTickCounter);
         }
         return false;
     }
@@ -123,7 +123,7 @@ public abstract class DistanceManagerMixin implements DistanceManagerBridge {
         return false;
     }
 
-    @SuppressWarnings({"ConstantConditions", "unchecked", "EqualsBetweenInconvertibleTypes"})
+    @SuppressWarnings({"ConstantConditions", "unchecked"})
     @Override
     public <T> Collection<Ticket<T>> bridge$tickets(final org.spongepowered.api.world.server.TicketType<T> ticketType) {
         return this.tickets.values().stream()
@@ -151,7 +151,7 @@ public abstract class DistanceManagerMixin implements DistanceManagerBridge {
         if (storedTicket != originalTicket) {
             ((TicketBridge) (Object) originalTicket).bridge$setParentTicket(storedTicket);
         }
-        ((TicketAccessor) (Object) storedTicket).invoker$setCreatedTick(ticketTickCounter);
+        ((TicketAccessor<?>) (Object) storedTicket).invoker$setCreatedTick(ticketTickCounter);
     }
 
 }

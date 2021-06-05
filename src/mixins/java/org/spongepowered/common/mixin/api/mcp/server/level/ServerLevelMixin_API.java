@@ -314,6 +314,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
         }
         this.serverLevelData.setWorldBorder((net.minecraft.world.level.border.WorldBorder.Settings) border);
         return worldBorder;
+    }
 
     @Override
     public ChunkManager chunkManager() {

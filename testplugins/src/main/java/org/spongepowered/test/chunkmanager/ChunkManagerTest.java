@@ -95,13 +95,6 @@ public final class ChunkManagerTest {
                                     Component.text().content("Ticket was not found in the chunk manager").color(NamedTextColor.RED).build());
                         }
 
-                        context.sendMessage(Identity.nil(),
-                                Component.text().content("Ticket processed: " + manager.processed(ticket)).color(NamedTextColor.RED).build());
-                        final Task task = Task.builder().delay(Ticks.of(5)).execute(() -> {
-                            context.sendMessage(Identity.nil(),
-                                    Component.text().content("Ticket processed: " + manager.processed(ticket)).color(NamedTextColor.RED).build());
-                        }).plugin(this.pluginContainer).build();
-                        Sponge.server().scheduler().submit(task);
                     } else {
                         context.sendMessage(Identity.nil(), Component.text("Ticket was not registered."));
                     }
