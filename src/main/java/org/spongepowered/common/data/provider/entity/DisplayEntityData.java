@@ -62,6 +62,9 @@ public class DisplayEntityData {
                     .create(Keys.TRANSFORM)
                         .get(DisplayEntityData::getTransform)
                         .set(DisplayEntityData::setTransform)
+                    .create(Keys.DISPLAY_TRANSFORM)
+                        .get(DisplayEntityData::getTransformMatrix)
+                        .set(DisplayEntityData::setTransformMatrix)
                 .asMutable(DisplayAccessor.class)
                     .create(Keys.BILLBOARD_TYPE)
                         .get(h -> (BillboardType) (Object) h.invoker$getBillboardConstraints())
@@ -231,4 +234,28 @@ public class DisplayEntityData {
         var vanillaTransform = new Transformation(vMatrix);
         ((DisplayAccessor) h).invoker$setTransformation(vanillaTransform);
     }
+
+    private static Matrix4d getTransformMatrix(final Display display) {
+        final Transformation transform = DisplayAccessor.invoker$createTransformation(display.getEntityData());
+        final var vMatrix = transform.getMatrix();
+
+        return new Matrix4d(
+            vMatrix.m00(), vMatrix.m01(), vMatrix.m02(), vMatrix.m03(),
+            vMatrix.m10(), vMatrix.m11(), vMatrix.m12(), vMatrix.m13(),
+            vMatrix.m20(), vMatrix.m21(), vMatrix.m22(), vMatrix.m23(),
+            vMatrix.m30(), vMatrix.m31(), vMatrix.m32(), vMatrix.m33()
+        );
+    }
+
+    private static void setTransformMatrix(final Display h, final Matrix4d matrix) {
+        var vMatrix = new org.joml.Matrix4f(
+            (float) matrix.get(0, 0), (float) matrix.get(0, 1), (float) matrix.get(0, 2), (float) matrix.get(0, 3),
+            (float) matrix.get(1, 0), (float) matrix.get(1, 1), (float) matrix.get(1, 2), (float) matrix.get(1, 3),
+            (float) matrix.get(2, 0), (float) matrix.get(2, 1), (float) matrix.get(2, 2), (float) matrix.get(2, 3),
+            (float) matrix.get(3, 0), (float) matrix.get(3, 1), (float) matrix.get(3, 2), (float) matrix.get(3, 3)
+        );
+        var vanillaTransform = new Transformation(vMatrix);
+        ((DisplayAccessor) h).invoker$setTransformation(vanillaTransform);
+    }
+
 }

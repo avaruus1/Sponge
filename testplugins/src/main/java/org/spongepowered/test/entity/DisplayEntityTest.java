@@ -28,6 +28,8 @@ import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.Command.Parameterized;
 import org.spongepowered.api.command.CommandResult;
@@ -40,6 +42,8 @@ import org.spongepowered.api.entity.display.DisplayEntity;
 import org.spongepowered.api.entity.display.TextAlignments;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -50,6 +54,7 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.imaginary.Quaterniond;
+import org.spongepowered.math.matrix.Matrix4d;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -62,6 +67,13 @@ public class DisplayEntityTest {
     @Inject
     public DisplayEntityTest(final PluginContainer plugin) {
         this.plugin = plugin;
+    }
+
+    @Listener
+    public void onBlockChange(final ChangeBlockEvent.All event, @First final ServerPlayer player) {
+        for (BlockTransaction transaction : event.transactions()) {
+            System.out.println(BlockTypes.registry().valueKey(transaction.original().state().type()) + " :: " + Operations.registry().valueKey(transaction.operation()));
+        }
     }
 
     @Listener
@@ -83,6 +95,7 @@ public class DisplayEntityTest {
                         final int col5 = 3;
                         final int col6 = 5;
                         final int col7 = 6;
+                        final int col8 = 7;
                         var textDisplay = spawnEntity(player.world(), EntityTypes.TEXT_DISPLAY, centerPos, forwardDir, -4, -1);
                         textDisplay.offer(Keys.DISPLAY_NAME, Component.text("DisplayEntityTest").color(NamedTextColor.GOLD));
                         textDisplay.offer(Keys.SEE_THROUGH_BLOCKS, true);
@@ -248,6 +261,19 @@ public class DisplayEntityTest {
                         textDisplay.offer(Keys.INTERPOLATION_DELAY, Ticks.of(20));
 
                         // TODO interpolate text opacity?
+
+
+                        blockDisplay = createEntity(player.world(), EntityTypes.BLOCK_DISPLAY, centerPos, forwardDir, col8, 0);
+                        blockDisplay.offer(Keys.BLOCK_STATE, BlockTypes.BEDROCK.get().defaultState());
+                        player.world().spawnEntity(blockDisplay);
+                        blockDisplay.offer(Keys.DISPLAY_TRANSFORM, Matrix4d.from(
+                            0.5, 0.3, -0.071, 0.8,
+                            1, 1, 0.69, 0,
+                            0.279, 0.873, -0.400, 0.019,
+                            0, 0, 0, 0
+                        ));
+                        blockDisplay.offer(Keys.INTERPOLATION_DURATION, Ticks.of(100));
+                        blockDisplay.offer(Keys.INTERPOLATION_DELAY, Ticks.of(100));
 
                     });
                     return CommandResult.success();
