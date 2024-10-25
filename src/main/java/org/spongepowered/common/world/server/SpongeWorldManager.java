@@ -163,14 +163,9 @@ public abstract class SpongeWorldManager implements WorldManager {
     }
 
     @Override
-    public Optional<Path> worldDirectory(final ResourceKey key) {
+    public Path worldDirectory(final ResourceKey key) {
         Objects.requireNonNull(key, "key");
-
-        Path directory = this.getDirectory(key);
-        if (Files.notExists(directory)) {
-            return Optional.empty();
-        }
-        return Optional.of(directory);
+        return this.getDirectory(key);
     }
 
     @Override
