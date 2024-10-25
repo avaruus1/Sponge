@@ -32,6 +32,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
@@ -89,6 +90,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.level.storage.LevelStorageSource_LevelStorageAccessAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
+import org.spongepowered.common.bridge.core.MappedRegistryBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.levelgen.WorldOptionsBridge;
@@ -656,6 +658,21 @@ public abstract class SpongeWorldManager implements WorldManager {
             this.server().dataPackManager().delete(this.findPack(key), key);
         } catch (final IOException e) {
             return FutureUtil.completedWithException(e);
+        }
+
+        //After vanilla has detected a new dimension from a data pack it "promotes" it
+        //to the overworld's level data where the level persist even when the data pack is removed.
+        //This forcible removes it from there too.
+        Registry<LevelStem> registry = SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM);
+        ((MappedRegistryBridge<LevelStem>) registry).bridge$forceRemoveValue(Registries.levelToLevelStem(registryKey));
+
+        try {
+            (((MinecraftServerAccessor) this.server).accessor$storageSource()).saveDataTag(
+                SpongeCommon.server().registryAccess(),
+                (PrimaryLevelData) SpongeCommon.server().overworld().getLevelData(),
+                SpongeCommon.server().getPlayerList().getSingleplayerData());
+        } catch (final Exception ex) {
+            return FutureUtil.completedWithException(ex);
         }
 
         return CompletableFuture.completedFuture(true);
