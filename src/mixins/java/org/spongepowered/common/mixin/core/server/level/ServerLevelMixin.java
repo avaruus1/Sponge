@@ -61,7 +61,6 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
@@ -180,11 +179,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                 this.dragonFight = null;
             }
         }
-    }
-
-    @Redirect(method = "getSeed", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/WorldData;worldGenOptions()Lnet/minecraft/world/level/levelgen/WorldOptions;"))
-    public WorldOptions impl$onGetSeed(final WorldData iServerConfiguration) {
-        return ((PrimaryLevelData) this.serverLevelData).worldGenOptions();
     }
 
     @Override
@@ -330,8 +324,14 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         return this.impl$recentTickTimes;
     }
 
-    @Redirect(method = "saveLevelData", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorldData()Lnet/minecraft/world/level/storage/WorldData;"))
-    private WorldData impl$usePerWorldLevelDataForDragonFight(final MinecraftServer server) {
+    @Redirect(method = {
+        "saveLevelData",
+        "findNearestMapStructure",
+        "isFlat",
+        "getSeed",
+        "enabledFeatures"
+    }, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorldData()Lnet/minecraft/world/level/storage/WorldData;"))
+    private WorldData impl$usePerWorldLevelData(final MinecraftServer server) {
         return (WorldData) this.shadow$getLevelData();
     }
 
