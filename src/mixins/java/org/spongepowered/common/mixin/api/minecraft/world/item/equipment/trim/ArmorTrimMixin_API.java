@@ -22,26 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin.entityactivation;
+package org.spongepowered.common.mixin.api.minecraft.world.item.equipment.trim;
 
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.mixin.plugin.AbstractMixinConfigPlugin;
+import net.minecraft.core.Holder;
+import org.spongepowered.api.item.recipe.smithing.TrimMaterial;
+import org.spongepowered.api.item.recipe.smithing.TrimPattern;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.ArrayList;
-import java.util.List;
+@Mixin(net.minecraft.world.item.equipment.trim.ArmorTrim.class)
+public abstract class ArmorTrimMixin_API implements org.spongepowered.api.item.recipe.smithing.ArmorTrim {
 
-public class EntityActivationRangePlugin extends AbstractMixinConfigPlugin {
-
-    private final List<String> mixins = new ArrayList<>();
+    // @formatter:off
+    @Shadow public abstract Holder<net.minecraft.world.item.equipment.trim.TrimMaterial> shadow$material();
+    @Shadow public abstract Holder<net.minecraft.world.item.equipment.trim.TrimPattern> shadow$pattern();
+    // @formatter:on
 
     @Override
-    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
-        return false && SpongeConfigs.getCommon().get().modules.entityActivationRange;
+    public TrimMaterial material() {
+        return (TrimMaterial) this.shadow$material();
     }
 
     @Override
-    public List<String> getMixins() {
-        return this.mixins;
+    public TrimPattern pattern() {
+        return (TrimPattern) this.shadow$pattern();
     }
-
 }

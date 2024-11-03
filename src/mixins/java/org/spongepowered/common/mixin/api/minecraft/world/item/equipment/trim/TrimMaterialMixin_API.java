@@ -22,26 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin.entityactivation;
+package org.spongepowered.common.mixin.api.minecraft.world.item.equipment.trim;
 
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.mixin.plugin.AbstractMixinConfigPlugin;
+import net.minecraft.world.item.equipment.trim.TrimMaterial;
+import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class EntityActivationRangePlugin extends AbstractMixinConfigPlugin {
-
-    private final List<String> mixins = new ArrayList<>();
-
-    @Override
-    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
-        return false && SpongeConfigs.getCommon().get().modules.entityActivationRange;
-    }
-
-    @Override
-    public List<String> getMixins() {
-        return this.mixins;
-    }
+@Mixin(TrimMaterial.class)
+public class TrimMaterialMixin_API implements org.spongepowered.api.item.recipe.smithing.TrimMaterial {
 
 }

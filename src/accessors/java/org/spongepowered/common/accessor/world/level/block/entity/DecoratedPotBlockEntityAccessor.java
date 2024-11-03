@@ -22,26 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin.entityactivation;
+package org.spongepowered.common.accessor.world.level.block.entity;
 
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.mixin.plugin.AbstractMixinConfigPlugin;
+import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
+import net.minecraft.world.level.block.entity.PotDecorations;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.ArrayList;
-import java.util.List;
+@Mixin(DecoratedPotBlockEntity.class)
+public interface DecoratedPotBlockEntityAccessor {
 
-public class EntityActivationRangePlugin extends AbstractMixinConfigPlugin {
-
-    private final List<String> mixins = new ArrayList<>();
-
-    @Override
-    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
-        return false && SpongeConfigs.getCommon().get().modules.entityActivationRange;
-    }
-
-    @Override
-    public List<String> getMixins() {
-        return this.mixins;
-    }
-
+    @Accessor("decorations")
+    void accessor$setDecorations(PotDecorations decorations);
 }

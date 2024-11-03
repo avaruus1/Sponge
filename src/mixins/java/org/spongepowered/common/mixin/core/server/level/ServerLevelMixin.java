@@ -167,8 +167,8 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         this.impl$levelSave = $$2;
         this.impl$chunkStatusListener = $$6;
         this.impl$prevWeather = ((ServerWorld) this).weather();
-        ((LevelTicksBridge<?>) this.blockTicks).bridge$setGameTimeSupplier(this.levelData::getGameTime);
-        ((LevelTicksBridge<?>) this.fluidTicks).bridge$setGameTimeSupplier(this.levelData::getGameTime);
+        ((LevelTicksBridge<?>) this.blockTicks).bridge$level((ServerLevel) (Object) this);
+        ((LevelTicksBridge<?>) this.fluidTicks).bridge$level((ServerLevel) (Object) this);
 
         final Boolean createDragonFight = ((DimensionTypeBridge) (Object) this.shadow$dimensionType()).bridge$createDragonFight();
         if (createDragonFight != null) {

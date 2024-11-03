@@ -22,26 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin.entityactivation;
+package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.mixin.plugin.AbstractMixinConfigPlugin;
+import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
+import org.spongepowered.api.block.entity.DecoratedPot;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
-public class EntityActivationRangePlugin extends AbstractMixinConfigPlugin {
+@Mixin(DecoratedPotBlockEntity.class)
+public abstract class DecoratedPotBlockEntityMixin_API extends BlockEntityMixin_API implements DecoratedPot {
 
-    private final List<String> mixins = new ArrayList<>();
-
-    @Override
-    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
-        return false && SpongeConfigs.getCommon().get().modules.entityActivationRange;
-    }
 
     @Override
-    public List<String> getMixins() {
-        return this.mixins;
-    }
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
+        values.add(this.front().asImmutable());
+        values.add(this.left().asImmutable());
+        values.add(this.right().asImmutable());
+        values.add(this.back().asImmutable());
+
+        return values;
+    }
 }

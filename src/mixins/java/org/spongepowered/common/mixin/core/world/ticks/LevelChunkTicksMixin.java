@@ -58,7 +58,6 @@ public abstract class LevelChunkTicksMixin<T> implements LevelChunkTicksBridge<T
         ((TickNextTickDataBridge<T>) (Object) $$0).bridge$createdByList(this.impl$tickList);
     }
 
-    @SuppressWarnings("unchecked")
     @Redirect(method = "save(JLjava/util/function/Function;)Lnet/minecraft/nbt/ListTag;",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/ticks/LevelChunkTicks;pack(J)Ljava/util/List;"))
     private List<SavedTick<T>> impl$onSaveSkipCancelled(final LevelChunkTicks<?> ticks, final long $$0) {

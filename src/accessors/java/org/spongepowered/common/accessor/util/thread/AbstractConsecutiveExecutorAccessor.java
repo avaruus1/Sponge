@@ -22,26 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin.entityactivation;
+package org.spongepowered.common.accessor.util.thread;
 
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.mixin.plugin.AbstractMixinConfigPlugin;
+import net.minecraft.util.thread.AbstractConsecutiveExecutor;
+import net.minecraft.util.thread.StrictQueue;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.ArrayList;
-import java.util.List;
+@Mixin(AbstractConsecutiveExecutor.class)
+public interface AbstractConsecutiveExecutorAccessor<T extends Runnable> {
 
-public class EntityActivationRangePlugin extends AbstractMixinConfigPlugin {
-
-    private final List<String> mixins = new ArrayList<>();
-
-    @Override
-    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
-        return false && SpongeConfigs.getCommon().get().modules.entityActivationRange;
-    }
-
-    @Override
-    public List<String> getMixins() {
-        return this.mixins;
-    }
-
+    @Accessor("queue") StrictQueue<T> accessor$queue();
 }

@@ -95,6 +95,7 @@ import org.spongepowered.common.accessor.world.level.storage.LevelStorageSource_
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.core.MappedRegistryBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.world.level.chunk.storage.IOWorkerBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.levelgen.WorldOptionsBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -640,6 +641,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         if (loadedWorld != null) {
             final boolean disableLevelSaving = loadedWorld.noSave;
             loadedWorld.noSave = true;
+            ((IOWorkerBridge) loadedWorld.getChunkSource().chunkMap.chunkScanner()).bridge$forciblyClear();
             try {
                 this.unloadWorld0(loadedWorld);
             } catch (final IOException e) {

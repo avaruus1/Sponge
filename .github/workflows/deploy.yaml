@@ -56,7 +56,7 @@ jobs:
           key: "${{ runner.os }}-minecraft-${{ env.CACHE_REV }}-${{ hashFiles('**/*.gradle*') }}"
           restore-keys: |
             ${{ runner.os }}-minecraft-${{ env.CACHE_REV }}-
-        # We don't need to run tests again, so we just publish
+          # We don't need to run tests again, so we just publish
       - name: setup / workspace
         if: "!startsWith(github.ref, 'refs/heads/update/') || matrix.project == 'vanilla'"
         run: |

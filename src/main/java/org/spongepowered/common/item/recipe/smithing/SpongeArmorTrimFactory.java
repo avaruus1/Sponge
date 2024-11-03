@@ -22,26 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin.entityactivation;
+package org.spongepowered.common.item.recipe.smithing;
 
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.mixin.plugin.AbstractMixinConfigPlugin;
+import net.minecraft.core.Registry;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.item.recipe.smithing.ArmorTrim;
+import org.spongepowered.api.item.recipe.smithing.TrimMaterial;
+import org.spongepowered.api.item.recipe.smithing.TrimPattern;
+import org.spongepowered.api.registry.RegistryTypes;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class EntityActivationRangePlugin extends AbstractMixinConfigPlugin {
-
-    private final List<String> mixins = new ArrayList<>();
-
-    @Override
-    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
-        return false && SpongeConfigs.getCommon().get().modules.entityActivationRange;
-    }
+public class SpongeArmorTrimFactory implements ArmorTrim.Factory {
 
     @Override
-    public List<String> getMixins() {
-        return this.mixins;
+    public ArmorTrim create(TrimMaterial material, TrimPattern pattern) {
+
+        final var trimRegistry = Sponge.server().registry(RegistryTypes.TRIM_MATERIAL);
+        final var patternRegistry = Sponge.server().registry(RegistryTypes.TRIM_PATTERN);
+
+        final var materialHolder = ((Registry<net.minecraft.world.item.equipment.trim.TrimMaterial>) trimRegistry).wrapAsHolder((net.minecraft.world.item.equipment.trim.TrimMaterial) (Object) material);
+        final var patternHolder = ((Registry<net.minecraft.world.item.equipment.trim.TrimPattern>) patternRegistry).wrapAsHolder((net.minecraft.world.item.equipment.trim.TrimPattern) (Object) pattern);
+        return (ArmorTrim) (Object) new net.minecraft.world.item.equipment.trim.ArmorTrim(materialHolder, patternHolder);
     }
 
 }
