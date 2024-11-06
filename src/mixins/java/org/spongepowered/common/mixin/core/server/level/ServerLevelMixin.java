@@ -235,8 +235,9 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Override
     public void bridge$triggerExplosion(Explosion explosion) {
         // Set up the pre event
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) (Object) this);
         if (ShouldFire.EXPLOSION_EVENT_PRE) {
-            final var cause = PhaseTracker.getCauseStackManager().currentCause();
+            final var cause = phaseTracker.currentCause();
             final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(cause, explosion, (ServerWorld) this);
             if (SpongeCommon.post(event)) {
                 return;
@@ -246,7 +247,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
         final ServerExplosion mcExplosion = (ServerExplosion) explosion;
 
-        try (final PhaseContext<?> ignored = GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER)
+        try (final PhaseContext<?> ignored = GeneralPhase.State.EXPLOSION.createPhaseContext(phaseTracker)
                 .explosion(mcExplosion)
                 .source(explosion.sourceExplosive().isPresent() ? explosion.sourceExplosive() : this)) {
             ignored.buildAndSwitch();
@@ -474,7 +475,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Inject(method = "globalLevelEvent", at = @At("HEAD"), cancellable = true)
     private void impl$throwBroadcastGlobalEvent(int effectID, BlockPos pos, int pitch, CallbackInfo ci) {
         if (!this.bridge$isFake() && ShouldFire.PLAY_SOUND_EVENT_BROADCAST) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getWorldInstance((ServerLevel) (Object) this).pushCauseFrame()) {
                 final PlaySoundEvent.Broadcast event = SpongeCommonEventFactory.callPlaySoundBroadcastEvent(frame, this, pos, effectID);
                 if (event != null && event.isCancelled()) {
                     ci.cancel();

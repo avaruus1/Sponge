@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.tracker.server.level;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.InteractionHand;
@@ -112,6 +113,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
             player.inventoryMenu.sendAllDataToRemote();
             return InteractionResult.FAIL;
         }
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) worldIn);
         // Sponge end
         if (this.gameModeForPlayer == GameType.SPECTATOR) {
             final MenuProvider inamedcontainerprovider = blockstate.getMenuProvider(worldIn, blockpos);
@@ -119,7 +121,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                 playerIn.openMenu(inamedcontainerprovider);
                 final Vector3i pos = VecHelper.toVector3i(blockRaytraceResultIn.getBlockPos());
                 final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
-                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame frame = phaseTracker.pushCauseFrame()) {
                     frame.pushCause(playerIn);
                     frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld)(worldIn)).createSnapshot(pos));
                     ((ContainerBridge) playerIn.containerMenu).bridge$setOpenLocation(location);
@@ -151,7 +153,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                         if (lastOpenContainer != playerIn.containerMenu) {
                             final Vector3i pos = VecHelper.toVector3i(blockRaytraceResultIn.getBlockPos());
                             final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
-                            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                            try (final CauseStackManager.StackFrame frame = phaseTracker.pushCauseFrame()) {
                                 frame.pushCause(playerIn);
                                 frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld) (worldIn)).createSnapshot(pos));
                                 ((ContainerBridge) playerIn.containerMenu).bridge$setOpenLocation(location);
@@ -184,7 +186,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                 } else {
                     result = stackIn.useOn(itemusecontext);
                     // Sponge start - log change in hand
-                    final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+                    final PhaseContext<@NonNull ?> context = phaseTracker.getPhaseContext();
                     final TransactionalCaptureSupplier transactor = context.getTransactor();
                     if (!transactor.isEmpty()) { //TODO: Add effect to attach the transaction to be the child of the parents
                         try (final EffectTransactor ignored = context.getTransactor().pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()))) {

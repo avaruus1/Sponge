@@ -373,7 +373,7 @@ public abstract class LivingEntityMixin_Attack_Impl extends EntityMixin implemen
                  result.damageToHelmet().isPresent() ||
                  result.damageToArmor().isPresent())
                 && (Object) this instanceof Player player) {
-                PhaseTracker.SERVER.getPhaseContext().getTransactor().logPlayerInventoryChange(player, PlayerInventoryTransaction.EventCreator.STANDARD);
+                PhaseTracker.getWorldInstance((ServerLevel) this.shadow$level()).getPhaseContext().getTransactor().logPlayerInventoryChange(player, PlayerInventoryTransaction.EventCreator.STANDARD);
                 player.inventoryMenu.broadcastChanges(); // capture
             }
         }

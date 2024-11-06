@@ -32,6 +32,7 @@ import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -82,7 +83,10 @@ public final class PacketPhaseUtil {
 
     @SuppressWarnings("removal")
     public static void handleSlotRestore(@Nullable final Player player, final @Nullable AbstractContainerMenu containerMenu, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
-        try (PhaseContext<@NonNull ?> ignored = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER).buildAndSwitch()) {
+        final PhaseTracker phaseTracker = player != null
+            ? PhaseTracker.getWorldInstance((ServerLevel) player.level())
+            : PhaseTracker.getWorldInstance();
+        try (PhaseContext<@NonNull ?> ignored = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(phaseTracker).buildAndSwitch()) {
             boolean restoredAny = false;
             for (final SlotTransaction slotTransaction : slotTransactions) {
 
@@ -252,7 +256,7 @@ public final class PacketPhaseUtil {
                 } else {
                     final IPhaseState<? extends PacketContext<?>> packetState = PacketPhase.getInstance().getStateForPacket(packetIn);
                     // At the very least make an unknown packet state case.
-                    final PacketContext<?> context = packetState.createPhaseContext(PhaseTracker.SERVER);
+                    final PacketContext<?> context = packetState.createPhaseContext(PhaseTracker.getWorldInstance(packetPlayer.serverLevel()));
                     context.source(packetPlayer)
                            .packetPlayer(packetPlayer)
                            .packet(packetIn);

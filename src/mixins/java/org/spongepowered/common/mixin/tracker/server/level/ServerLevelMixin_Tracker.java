@@ -135,7 +135,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     private void tracker$wrapNormalEntityTick(final ServerLevel level, final Consumer<Entity> entityUpdateConsumer,
         final Entity entity
     ) {
-        final PhaseContext<@NonNull ?> currentState = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> currentState = PhaseTracker.getWorldInstance((ServerLevel) (Object) this).getPhaseContext();
         TrackingUtil.tickEntity(entityUpdateConsumer, entity);
     }
 
@@ -204,7 +204,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         )
     )
     private void tracker$startWeatherTickPhase(final LevelChunk param0, final int param1, final CallbackInfo ci) {
-        TickPhase.Tick.WEATHER.createPhaseContext(PhaseTracker.SERVER)
+        TickPhase.Tick.WEATHER.createPhaseContext(PhaseTracker.getWorldInstance((ServerLevel) (Object) this))
             .buildAndSwitch();
     }
 
@@ -217,7 +217,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         )
     )
     private void tracker$closeWeatherTickPhase(final LevelChunk param0, final int param1, final CallbackInfo ci) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance((ServerLevel) (Object) this).getPhaseContext();
         if (context.getState() != TickPhase.Tick.WEATHER) {
             throw new IllegalStateException("Expected to be in a Weather ticking state, but we aren't.");
         }
@@ -242,7 +242,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         final ObjectLinkedOpenHashSet<BlockEventData> list, final Object data,
         final BlockPos pos, final Block blockIn, final int eventID, final int eventParam
     ) {
-        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
+        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getWorldInstance((ServerLevel) (Object) this).getPhaseContext();
         final BlockEventData blockEventData = (BlockEventData) data;
         final TrackableBlockEventDataBridge blockEvent = (TrackableBlockEventDataBridge) (Object) blockEventData;
         // Short circuit phase states who do not track during block events
@@ -323,7 +323,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         final var explosionBuilder = org.spongepowered.api.world.explosion.Explosion.builder().from((org.spongepowered.api.world.explosion.Explosion) mcExplosion);
 
         Explosive apiExplosive = (Explosive) entity;
-        final var detonateEvent = SpongeEventFactory.createDetonateExplosiveEvent(PhaseTracker.getCauseStackManager().currentCause(),
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) (Object) this);
+        final var detonateEvent = SpongeEventFactory.createDetonateExplosiveEvent(phaseTracker.currentCause(),
                 explosionBuilder, apiExplosive, (org.spongepowered.api.world.explosion.Explosion) instance);
         if (Sponge.eventManager().post(detonateEvent)) {
             this.tracker$cancelExplosionEffects(entity);
@@ -340,7 +341,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         if (ShouldFire.EXPLOSION_EVENT_PRE) {
             // Set up the pre event
             final ExplosionEvent.Pre event =
-                SpongeEventFactory.createExplosionEventPre(PhaseTracker.SERVER.currentCause(), apiExplosion, thisWorld);
+                SpongeEventFactory.createExplosionEventPre(phaseTracker.currentCause(), apiExplosion, thisWorld);
             if (SpongeCommon.post(event)) {
                 this.tracker$cancelExplosionEffects(entity);
                 return;
@@ -358,7 +359,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             }
         }
 
-        try (final PhaseContext<@NonNull ?> ctx = GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER).explosion(mcExplosion)
+        try (final PhaseContext<@NonNull ?> ctx = GeneralPhase.State.EXPLOSION.createPhaseContext(phaseTracker).explosion(mcExplosion)
             .source(((Optional) apiExplosion.sourceExplosive()).orElse(this))) {
             ctx.buildAndSwitch();
 
@@ -404,8 +405,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         if (this.bridge$isFake()) {
             return Optional.empty();
         }
-        final PhaseTracker instance = PhaseTracker.getInstance();
-        if (instance.getSidedThread() != PhaseTracker.SERVER.getSidedThread() && instance != PhaseTracker.SERVER) {
+        final PhaseTracker instance = PhaseTracker.getWorldInstance((ServerLevel) (Object) this);
+        if (!instance.onSidedThread()) {
             throw new UnsupportedOperationException("Cannot perform a tracked Block Change on a ServerWorld while not on the main thread!");
         }
         final SpongeBlockChangeFlag spongeFlag = BlockChangeFlagManager.fromNativeInt(flags);
@@ -466,8 +467,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         if (this.bridge$isFake()) {
             return super.setBlock(pos, newState, flags, limit);
         }
-        final PhaseTracker instance = PhaseTracker.getInstance();
-        if (instance.getSidedThread() != PhaseTracker.SERVER.getSidedThread() && instance != PhaseTracker.SERVER) {
+        final PhaseTracker instance = PhaseTracker.getWorldInstance((ServerLevel) (Object) this);
+        if (!instance.onSidedThread()) {
             throw new UnsupportedOperationException("Cannot perform a tracked Block Change on a ServerWorld while not on the main thread!");
         }
         final SpongeBlockChangeFlag spongeFlag = BlockChangeFlagManager.fromNativeInt(flags);
@@ -499,8 +500,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             if (this.bridge$isFake()) {
                 return super.destroyBlock(pos, doDrops, p_241212_3_, limit);
             }
-            final PhaseTracker instance = PhaseTracker.getInstance();
-            if (instance.getSidedThread() != PhaseTracker.SERVER.getSidedThread() && instance != PhaseTracker.SERVER) {
+            final PhaseTracker instance = PhaseTracker.getWorldInstance((ServerLevel) (Object) this);
+            if (!instance.onSidedThread()) {
                 throw new UnsupportedOperationException("Cannot perform a tracked Block Change on a ServerWorld while not on the main thread!");
             }
             final FluidState fluidstate = this.shadow$getFluidState(pos);
@@ -592,7 +593,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         if (tileentity == null) {
             return;
         }
-        if (this.bridge$isFake() || PhaseTracker.SERVER.getSidedThread() != Thread.currentThread()) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) (Object) this);
+        if (this.bridge$isFake() || !phaseTracker.onSidedThread()) {
             // If we're fake or not on the server thread, well, we could effectively call
             // out whoever is trying to remove tile entities asynchronously....
             super.shadow$removeBlockEntity(immutable);
@@ -601,7 +603,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         // Otherwise, let's go on and check if we're recording transactions,
         // and if so, log the tile entity removal (may associate with an existing transaction,
         // or create a new transaction.
-        final PhaseContext<@NonNull ?> current = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> current = phaseTracker.getPhaseContext();
         if (current.getTransactor().logTileRemoval(tileentity, () -> (ServerLevel) (Object) this)) {
             final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerLevel) (Object) this, immutable)
                 .addEffect(RemoveTileEntityFromChunkEffect.getInstance())
@@ -616,7 +618,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     @Override
     public void shadow$setBlockEntity(final net.minecraft.world.level.block.entity.BlockEntity proposed) {
         final BlockPos immutable = proposed.getBlockPos().immutable();
-        if (this.bridge$isFake() || PhaseTracker.SERVER.getSidedThread() != Thread.currentThread()) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) (Object) this);
+        if (this.bridge$isFake() || !phaseTracker.onSidedThread()) {
             // If we're fake or not on the server thread, well, we could effectively call
             // out whoever is trying to remove tile entities asynchronously....
             super.shadow$setBlockEntity(proposed);
@@ -630,7 +633,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         // Otherwise, let's go on and check if we're recording transactions,
         // and if so, log the tile entity removal (may associate with an existing transaction,
         // or create a new transaction.
-        final PhaseContext<@NonNull ?> current = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> current = phaseTracker.getPhaseContext();
         if (current.doesBlockEventTracking()) {
             final net.minecraft.world.level.block.entity.@Nullable BlockEntity existing = this.shadow$getChunkAt(immutable).getBlockEntity(immutable);
             if (current.getTransactor().logTileReplacement(immutable, existing, proposed, () -> (ServerLevel) (Object) this)) {
@@ -657,8 +660,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         if (this.bridge$isFake()) {
             return;
         }
-        final PhaseTracker tracker = PhaseTracker.SERVER;
-        if (tracker.getSidedThread() != Thread.currentThread()) {
+        final PhaseTracker tracker = PhaseTracker.getWorldInstance((ServerLevel) (Object) this);
+        if (!tracker.onSidedThread()) {
             // TODO - async entity spawn logging
             return;
         }

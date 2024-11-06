@@ -70,7 +70,7 @@ public abstract class LevelTicksMixin_Tracker {
         final var thisScheduledTick = this.alreadyRunThisTick.get(this.alreadyRunThisTick.size() - 1);
         if (((ScheduledTickBridge) (Object) thisScheduledTick).bridge$isPartOfWorldGeneration()) {
             try (final var context = GenerationPhase.State.DEFERRED_SCHEDULED_UPDATE.createPhaseContext(
-                    PhaseTracker.SERVER)
+                    PhaseTracker.getWorldInstance())
                 .source(this)
                 .scheduledUpdate((BlockPos) blockPos, ticking)
             ) {

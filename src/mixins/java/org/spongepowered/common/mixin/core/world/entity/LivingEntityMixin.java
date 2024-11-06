@@ -146,7 +146,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Inject(method = "die", at = @At("HEAD"), cancellable = true)
     private void impl$throwDestructEntityDeath(final DamageSource cause, final CallbackInfo ci) {
-        final boolean throwEvent = !((LevelBridge) this.shadow$level()).bridge$isFake() && Sponge.isServerAvailable() && Sponge.server().onMainThread();
+        final boolean throwEvent = !((LevelBridge) this.shadow$level()).bridge$isFake() && Sponge.isServerAvailable() && PhaseTracker.getWorldInstance().onSidedThread();
         if (!this.dead) { // isDead should be set later on in this method so we aren't re-throwing the events.
             if (throwEvent && this.impl$deathEventsPosted <= Constants.Sponge.MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
@@ -454,17 +454,18 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             stack.releaseUsing(world, self, duration);
             return;
         }
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) world);
+        try (final CauseStackManager.StackFrame frame = phaseTracker.pushCauseFrame()) {
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
             final HandType handType = (HandType) (Object) this.shadow$getUsedItemHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
             final Ticks ticksDuration = SpongeTicks.ticksOrInfinite(duration);
-            if (!SpongeCommon.post(SpongeEventFactory.createUseItemStackEventStop(PhaseTracker.getCauseStackManager().currentCause(),
+            if (!SpongeCommon.post(SpongeEventFactory.createUseItemStackEventStop(phaseTracker.currentCause(),
                 ticksDuration, ticksDuration, snapshot))) {
                 stack.releaseUsing(world, self, duration);
                 if (self instanceof ServerPlayer) {
                     // Log Change and capture SlotTransactions
-                    PhaseTracker.SERVER.getPhaseContext().getTransactor().logPlayerInventoryChange(((ServerPlayer) self), PlayerInventoryTransaction.EventCreator.STANDARD);
+                    phaseTracker.getPhaseContext().getTransactor().logPlayerInventoryChange(((ServerPlayer) self), PlayerInventoryTransaction.EventCreator.STANDARD);
                     ((ServerPlayer) self).inventoryMenu.broadcastChanges();
                 }
             }

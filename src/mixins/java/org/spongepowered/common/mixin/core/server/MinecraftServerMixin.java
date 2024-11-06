@@ -154,7 +154,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
                                                            final AtomicReference<MinecraftServer> atomicReference,
                                                            final Thread thread) {
         try {
-            PhaseTracker.SERVER.setThread(thread);
+            PhaseTracker.getServerInstanceExplicitly().setThread(thread);
         } catch (final IllegalAccessException e) {
             throw new RuntimeException("Could not initialize the server PhaseTracker!");
         }

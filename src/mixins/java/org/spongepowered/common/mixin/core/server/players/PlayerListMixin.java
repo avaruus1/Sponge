@@ -444,8 +444,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         ((ServerPlayerBridge) mcPlayer).bridge$setConnectionMessageToSend(null);
 
-        final PhaseContext<?> context = PhaseTracker.SERVER.getPhaseContext();
-        PhaseTracker.SERVER.pushCause(event);
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance(mcPlayer.serverLevel());
+        final PhaseContext<?> context = phaseTracker.getPhaseContext();
+        phaseTracker.pushCause(event);
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         transactor.logPlayerInventoryChange(mcPlayer, PlayerInventoryTransaction.EventCreator.STANDARD);
         try (final EffectTransactor ignored = BroadcastInventoryChangesEffect.transact(transactor)) {
@@ -642,7 +643,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final Predicate<net.minecraft.server.level.ServerPlayer> filter;
         ChatType.Bound boundChatType;
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getServerInstanceExplicitly().pushCauseFrame()) {
             if ($$2 != null) {
                 frame.pushCause($$2);
             }

@@ -291,7 +291,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin_Attack_I
         instance.setItemInHand(interactionHand, stack);
 
         // Capture...
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getWorldInstance((ServerLevel) this.shadow$level()).getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         transactor.logPlayerInventoryChange(instance, PlayerInventoryTransaction.EventCreator.STANDARD);
         this.inventoryMenu.broadcastChanges();

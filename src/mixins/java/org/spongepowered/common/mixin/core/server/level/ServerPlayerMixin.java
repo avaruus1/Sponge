@@ -523,11 +523,12 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         var isDimensionChange = transition.newLevel() != thisPlayer.serverLevel();
 
         if (!this.impl$moveEventsFired) {
-            final var contextToSwitchTo = EntityPhase.State.PORTAL_DIMENSION_CHANGE.createPhaseContext(PhaseTracker.getInstance()).worldChange()
+            final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance(thisPlayer.serverLevel());
+            final var contextToSwitchTo = EntityPhase.State.PORTAL_DIMENSION_CHANGE.createPhaseContext(phaseTracker).worldChange()
                     .player();
-            final boolean hasMovementContext = PhaseTracker.SERVER.currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE);
+            final boolean hasMovementContext = phaseTracker.currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE);
             try (final TeleportContext context = contextToSwitchTo.buildAndSwitch();
-                    final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                    final CauseStackManager.StackFrame frame = phaseTracker.pushCauseFrame()) {
                 frame.pushCause(thisPlayer);
                 if (!hasMovementContext) {
                     // TODO we should be able to detect normal plugin code though
@@ -563,7 +564,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                     newDest = reposition.destinationPosition();
                 } else {
                     if (ShouldFire.MOVE_ENTITY_EVENT) { // TODO move into impl$fireMoveEvent?
-                        newDest = this.impl$fireMoveEvent(PhaseTracker.SERVER, originalDest);
+                        newDest = this.impl$fireMoveEvent(phaseTracker, originalDest);
                         if (newDest == null) {
                             return null;
                         }

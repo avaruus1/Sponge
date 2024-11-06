@@ -240,10 +240,11 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             return false;
         }
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+        final ServerLevel originalWorld = (ServerLevel) this.shadow$level();
+        final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance(originalWorld);
+        try (final CauseStackManager.StackFrame frame = phaseTracker.pushCauseFrame()) {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
 
-            final ServerLevel originalWorld = (ServerLevel) this.shadow$level();
             final ServerLevel originalDestinationWorld = (ServerLevel) location.world();
             final ServerLevel destinationWorld;
             final @org.checkerframework.checker.nullness.qual.Nullable Vector3d destinationPosition;
@@ -265,7 +266,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 destinationPosition = repositionEvent.destinationPosition();
             } else {
                 destinationWorld = (ServerLevel) this.shadow$level();
-                destinationPosition = this.impl$fireMoveEvent(PhaseTracker.SERVER, location.position());
+                destinationPosition = this.impl$fireMoveEvent(phaseTracker, location.position());
                 if (destinationPosition == null) {
                     return false;
                 }
@@ -275,7 +276,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
             if (isChangeOfWorld) {
                 Sponge.eventManager().post(SpongeEventFactory.createChangeEntityWorldEventPost(
-                        PhaseTracker.getCauseStackManager().currentCause(),
+                        phaseTracker.currentCause(),
                         (org.spongepowered.api.entity.Entity) this,
                         (ServerWorld) originalWorld,
                         (ServerWorld) originalDestinationWorld,
@@ -875,7 +876,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             this.remainingFireTicks < 1 && ticks >= Constants.Entity.MINIMUM_FIRE_TICKS &&
             this.impl$canCallIgniteEntityEvent()) {
 
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            final PhaseTracker phaseTracker = PhaseTracker.getWorldInstance((ServerLevel) entity.level());
+            try (final CauseStackManager.StackFrame frame = phaseTracker.pushCauseFrame()) {
 
                 frame.pushCause(((org.spongepowered.api.entity.Entity) this).location().world());
                 final IgniteEntityEvent event = SpongeEventFactory.
@@ -892,7 +894,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     .build();
 
                 final ChangeDataHolderEvent.ValueChange valueChange = SpongeEventFactory.createChangeDataHolderEventValueChange(
-                    PhaseTracker.SERVER.currentCause(),
+                    phaseTracker.currentCause(),
                     transaction,
                     (DataHolder.Mutable) this);
 
