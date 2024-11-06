@@ -47,11 +47,8 @@ import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.ticks.ScheduledTick;
-import net.minecraft.world.ticks.TickPriority;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
@@ -172,44 +169,6 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             target = "Lnet/minecraft/world/level/material/FluidState;tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
     private void tracker$wrapFluidTick(final FluidState fluidState, final ServerLevel level, final BlockPos pos, final BlockState blockState) {
         TrackingUtil.updateTickFluid(this, fluidState, pos, blockState);
-    }
-
-    private <T> ScheduledTick<T> tracker$createTick(final BlockPos pos, final T type, final int triggerTick, final TickPriority priority) {
-        return new ScheduledTick<>(type, pos, this.getLevelData().getGameTime() + (long)triggerTick, priority, this.nextSubTickCount());
-    }
-
-    private <T> ScheduledTick<T> tracker$createTick(final BlockPos pos, final T type, final int triggerTick) {
-        return new ScheduledTick<>(type, pos, this.getLevelData().getGameTime() + (long)triggerTick, this.nextSubTickCount());
-    }
-
-    @Override
-    public void scheduleTick(final BlockPos pos, final Block block, final int triggerTick, final TickPriority priority) {
-        final var scheduledTick = this.tracker$createTick(pos, block, triggerTick, priority);
-        PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate((ServerLevel) (Object) this, scheduledTick);
-        this.getBlockTicks().schedule(scheduledTick);
-    }
-
-    @Override
-    public void scheduleTick(final BlockPos pos, final Block block, final int triggerTick) {
-        final var scheduledTick = this.tracker$createTick(pos, block, triggerTick);
-        PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate((ServerLevel) (Object) this, scheduledTick);
-        this.getBlockTicks().schedule(scheduledTick);
-    }
-
-    @Override
-    public void scheduleTick(
-        final BlockPos pos, final Fluid fluid, final int triggerTick, final TickPriority priority
-    ) {
-        final var scheduledTick = this.tracker$createTick(pos, fluid, triggerTick, priority);
-        PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate((ServerLevel) (Object) this, scheduledTick);
-        this.getFluidTicks().schedule(scheduledTick);
-    }
-
-    @Override
-    public void scheduleTick(final BlockPos pos, final Fluid fluid, final int triggerTick) {
-        final var scheduledTick = this.tracker$createTick(pos, fluid, triggerTick);
-        PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate((ServerLevel) (Object) this, scheduledTick);
-        this.getFluidTicks().schedule(scheduledTick);
     }
 
     /**
