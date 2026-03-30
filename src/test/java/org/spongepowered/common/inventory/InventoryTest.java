@@ -46,21 +46,24 @@ public final class InventoryTest {
         when(metadata.id()).thenReturn("test");
 
         final var inv = Inventory.builder()
-            .slots(1)
+            .slots(2)
             .completeStructure()
             .plugin(plugin)
             .build();
 
         final var other = Inventory.builder()
-            .slots(1)
+            .slots(2)
             .completeStructure()
             .plugin(plugin)
             .build();
 
         final var combined = inv.union(other);
 
-        Assertions.assertEquals(InventoryTransactionResult.Type.SUCCESS, combined.offer(ItemStack.of(ItemTypes.DIRT)).type());
-        Assertions.assertEquals(InventoryTransactionResult.Type.SUCCESS, combined.offer(ItemStack.of(ItemTypes.STONE)).type());
+        for (int i = 0; i < 4; i++) {
+            Assertions.assertEquals(InventoryTransactionResult.Type.SUCCESS, combined.offer(ItemStack.of(ItemTypes.DIAMOND_SWORD)).type());
+        }
+
+        Assertions.assertEquals(InventoryTransactionResult.Type.FAILURE, combined.offer(ItemStack.of(ItemTypes.DIAMOND_SWORD)).type());
     }
 
 }
