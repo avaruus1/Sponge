@@ -84,6 +84,25 @@ public class DelegatingLens extends AbstractLens {
         return this.delegate.getAdapter(fabric.fabric$offset(this.base), parent);
     }
 
+    @Override
+    public SlotLens getSlotLens(Fabric fabric, int ordinal) {
+        SlotLens slot = super.getSlotLens(fabric, ordinal);
+        if (slot != null) {
+            return new org.spongepowered.common.inventory.lens.impl.slot.OffsetSlotLens(slot, this.base);
+        }
+        return null;
+    }
+
+    @Override
+    public List<SlotLens> getSlots(Fabric fabric) {
+        List<SlotLens> slots = super.getSlots(fabric);
+        List<SlotLens> offsetSlots = new ArrayList<>(slots.size());
+        for (SlotLens slot : slots) {
+            offsetSlots.add(new org.spongepowered.common.inventory.lens.impl.slot.OffsetSlotLens(slot, this.base));
+        }
+        return offsetSlots;
+    }
+
     public static class CustomSlotProvider implements SlotLensProvider {
 
         private List<SlotLens> lenses = new ArrayList<>();

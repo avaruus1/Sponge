@@ -45,9 +45,13 @@ public final class UnionQuery extends SpongeQuery {
         final CompoundLens.Builder lensBuilder = CompoundLens.builder().add(adapter.inventoryAdapter$getRootLens());
         final CompoundFabric fabric = new CompoundFabric(adapter.inventoryAdapter$getFabric(), ((InventoryBridge)this.other).bridge$getAdapter().inventoryAdapter$getFabric());
         final CompoundSlotLensProvider provider = new CompoundSlotLensProvider().add(adapter);
+
+        int offset = adapter.inventoryAdapter$getFabric().fabric$getSize();
         for (final Inventory inv : this.other.slots()) {
-            lensBuilder.add(((InventoryAdapter) inv).inventoryAdapter$getRootLens());
-            provider.add((InventoryAdapter) inv);
+            org.spongepowered.common.inventory.lens.slots.SlotLens slotLens = (org.spongepowered.common.inventory.lens.slots.SlotLens) ((InventoryAdapter) inv).inventoryAdapter$getRootLens();
+            org.spongepowered.common.inventory.lens.impl.slot.OffsetSlotLens offsetLens = new org.spongepowered.common.inventory.lens.impl.slot.OffsetSlotLens(slotLens, offset);
+            lensBuilder.add(offsetLens);
+            provider.add(offsetLens);
         }
         final CompoundLens lens = lensBuilder.build(provider);
         return lens.getAdapter(fabric, inventory);

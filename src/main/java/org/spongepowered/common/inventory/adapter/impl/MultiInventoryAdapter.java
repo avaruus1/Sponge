@@ -31,18 +31,22 @@ import org.spongepowered.common.inventory.fabric.CompoundFabric;
 import org.spongepowered.common.inventory.lens.impl.QueryLens;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MultiInventoryAdapter extends BasicInventoryAdapter {
 
-    // Constructs inventory with given list of inventories
-    // TODO check if this is correct
     public MultiInventoryAdapter(List<Inventory> children) {
-        super(new CompoundFabric(children), new QueryLens(
-                children.stream()
-                        .map(InventoryBridge.class::cast)
-                        .map(InventoryBridge::bridge$getAdapter)
-                        .map(InventoryAdapter::inventoryAdapter$getRootLens).collect(Collectors.toList())), null);
+        super(new CompoundFabric(children), new QueryLens(buildLensMap(children), null), null);
         this.children = children; // Init cached children
+    }
+
+    private static java.util.Map<org.spongepowered.common.inventory.lens.Lens, Integer> buildLensMap(List<Inventory> children) {
+        java.util.Map<org.spongepowered.common.inventory.lens.Lens, Integer> lensesWithOffsets = new java.util.LinkedHashMap<>();
+        int offset = 0;
+        for (Inventory child : children) {
+            InventoryAdapter adapter = ((InventoryBridge) child).bridge$getAdapter();
+            lensesWithOffsets.put(adapter.inventoryAdapter$getRootLens(), offset);
+            offset += adapter.inventoryAdapter$getFabric().fabric$getSize();
+        }
+        return lensesWithOffsets;
     }
 }
