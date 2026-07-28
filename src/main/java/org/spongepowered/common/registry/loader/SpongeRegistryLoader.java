@@ -378,6 +378,7 @@ public final class SpongeRegistryLoader {
             l.add(ParticleOptions.OFFSET, k -> new SpongeParticleOption<>(Vector3d.class));
             l.add(ParticleOptions.OPACITY, k -> new SpongeParticleOption<>(Double.class,
                     v -> v < 0 || v > 1 ? new IllegalArgumentException("Opacity must be between 0 and 1") : null));
+            l.add(ParticleOptions.POWER, k -> new SpongeParticleOption<>(Double.class));
             l.add(ParticleOptions.QUANTITY, k -> new SpongeParticleOption<>(Integer.class,
                     v -> v < 1 ? new IllegalArgumentException("Quantity must be at least one") : null));
             l.add(ParticleOptions.ROLL, k -> new SpongeParticleOption<>(Double.class));

@@ -73,6 +73,8 @@ public final class ParticleOptionUtil {
         } else if (type == ParticleTypes.ENTITY_EFFECT) {
             options.put(ParticleOptions.COLOR.get(), Color.RED);
             options.put(ParticleOptions.OPACITY.get(), 1.0d);
+        } else if (type == ParticleTypes.DRAGON_BREATH) {
+            options.put(ParticleOptions.POWER.get(), 1.0d);
         }
 
         return ImmutableMap.copyOf(options);

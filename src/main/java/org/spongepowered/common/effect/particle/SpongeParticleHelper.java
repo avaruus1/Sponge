@@ -30,6 +30,7 @@ import net.minecraft.core.particles.DustColorTransitionOptions;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.PowerParticleOption;
 import net.minecraft.core.particles.SculkChargeParticleOptions;
 import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -162,6 +163,13 @@ public final class SpongeParticleHelper {
             final var color = effect.optionOrDefault(ParticleOptions.COLOR).map(c -> ARGB.color(c.red(), c.green(), c.blue())).orElse(16545810);
             final var particleData = new TrailParticleOption(VecHelper.toVanillaVector3d(dest), color, (int) duration.ticks());
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
+        } else if (internalType == ParticleTypes.DRAGON_BREATH) {
+            // This particle type supports the power option.
+            final float power = effect.optionOrDefault(ParticleOptions.POWER).get().floatValue();
+            final var particleData = PowerParticleOption.create(
+                (net.minecraft.core.particles.ParticleType<PowerParticleOption>) internalType,
+                power);
+            return new NamedCachedPacket(particleData, offset, quantity, velocity);
         }
 
         // Otherwise, we don't really know how to get a valid ParticleOptions. Sorry mods!
@@ -215,6 +223,10 @@ public final class SpongeParticleHelper {
                     ParticleOptions.COLOR.get(), Color.of(Vector3i.from(ARGB.red(color), ARGB.green(color), ARGB.blue(color))),
                     ParticleOptions.TRAVEL_TIME.get(), Ticks.of(duration),
                     ParticleOptions.TARGET.get(), VecHelper.toVector3d(target)
+            ));
+        } else if (effect instanceof PowerParticleOption powerOption) {
+            return new SpongeParticleEffect((ParticleType) type, Map.of(
+                ParticleOptions.POWER.get(), powerOption.getPower()
             ));
         }
 
